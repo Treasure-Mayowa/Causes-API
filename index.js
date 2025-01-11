@@ -7,7 +7,7 @@ const url = process.env.MONGODB_URI
 const app = express()
 
 const hostname = process.env.HOSTNAME 
-const port = process.env.
+const port = process.env.PORT
 
 app.listen(port, hostname, () => {
     console.log(`Server running at http://${hostname}:${port}/`)
