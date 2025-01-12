@@ -74,11 +74,11 @@ app.post('/causes', async (req, res) => {
         imageURLRegex.test(imageURL) ? null : res.status(400).send('Invalid imageURL')
 
         // String sanitation
-        title = validator.escape(title)
-        description = validator.escape(description)
+        const titleSan = validator.escape(title)
+        const descriptionSan = validator.escape(description)
   
         // Insert cause into collection
-        const result = await collection.insertOne({cause: title, description, imageURL})
+        const result = await collection.insertOne({cause: titleSan, descriptionSan, imageURL})
         res.json(result)
 
     } catch (err) {
@@ -118,11 +118,11 @@ app.put('/causes/:id', async (req, res) => {
         idRegex.test(id) ? null : res.status(400).send('Invalid id format')
         
         // String sanitation
-        title = validator.escape(title)
-        description = validator.escape(description)
+        const titleSan = validator.escape(title)
+        const descriptionSan = validator.escape(description)
 
         // Update cause in collection
-        const result = await collection.updateOne({ _id: new ObjectId(id) }, { $set: { title, description, imageURL } })
+        const result = await collection.updateOne({ _id: new ObjectId(id) }, { $set: { titleSan, descriptionSan, imageURL } })
         result.matchedCount ? res.json(result) : res.status(404).send('Cause not found')
     } catch (err) {
         res.status(500).send(err.message)   
@@ -160,7 +160,7 @@ app.post('/causes/:id/contribute', async (req, res) => {
         emailRegex.test(email) ? null : res.status(400).send('Invalid email address')
 
         // String sanitation
-        name = validator.escape(name)
+        const nameSan = validator.escape(name)
 
         const idRegex = /^[0-9a-fA-F]{24}$/
         idRegex.test(id) ? null : res.status(400).send('Invalid id format')
@@ -170,8 +170,7 @@ app.post('/causes/:id/contribute', async (req, res) => {
         cause ? null : res.status(404).send('Cause not found')
 
         const contributionCollection = database.collection("contributions")
-        const contributions =  { name, email, amount }
-        const result = await contributionCollection.insertOne({ causeId: new ObjectId(id), causeDonatedTo: cause.title,  contributions })
+        const result = await contributionCollection.insertOne({ causeId: new ObjectId(id), causeDonatedTo: cause.title,  nameSan, email, amount })
         res.json(result)
     } catch (err) {
         res.status(500).send(err.message)   
