@@ -61,10 +61,9 @@ app.get('/causes', async (req, res) => {
 // Create a new cause
 app.post('/causes', async (req, res) => {
     try {
-        const { title, description, imageURL } = JSON.parse(req.body)
+        const { title, description, imageURL } = req.body
         
         // Parameters validation
-        title && description && imageURL ? null : res.status(400).send('Missing required fields')
         title ? null : res.status(400).send('Missing title')
         description ? null : res.status(400).send('Missing description')
         imageURL ? null : res.status(400).send('Missing imageURL')  
@@ -95,7 +94,6 @@ app.put('/causes/:id', async (req, res) => {
     const { title, description, imageURL } = req.body
     try {
         // Parameters validation
-        title && description && imageURL ? null : res.status(400).send('Missing required fields')
         title ? null : res.status(400).send('Missing title')
         description ? null : res.status(400).send('Missing description')
         imageURL ? null : res.status(400).send('Missing imageURL')  
@@ -126,7 +124,6 @@ app.post('/causes/:id/contribute', async (req, res) => {
     try {
 
         // Parameters validation
-        name && email && amount ? null : res.status(400).send('Missing required fields')
         name ? null : res.status(400).send('Missing name')
         email ? null : res.status(400).send('Missing email')
         amount ? null : res.status(400).send('Missing amount')  
