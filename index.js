@@ -7,11 +7,14 @@ const url = process.env.MONGODB_URI
 const app = express()
 
 const hostname = process.env.HOSTNAME 
-const port = process.env.PORT
+const port = process.env.PORT 
 
 app.listen(port, hostname, () => {
     console.log(`Server running at http://${hostname}:${port}/`)
 })
+
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
 let database
 let collection
@@ -58,7 +61,7 @@ app.get('/causes', async (req, res) => {
 // Create a new cause
 app.post('/causes', async (req, res) => {
     try {
-        const { title, description, imageURL } = req.body
+        const { title, description, imageURL } = JSON.parse(req.body)
         
         // Parameters validation
         title && description && imageURL ? null : res.status(400).send('Missing required fields')
@@ -130,7 +133,7 @@ app.post('/causes/:id/contribute', async (req, res) => {
 
         // Retrieve cause by id   
         const cause = await collection.findOne({ _id: new ObjectId(id) })
-        cause.matchedCount ? null : res.status(404).send('Cause not found')
+        cause ? null : res.status(404).send('Cause not found')
 
         const contributionCollection = database.collection("contributions")
         const contributions =  { name, email, amount }
