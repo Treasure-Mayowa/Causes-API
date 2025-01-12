@@ -1,6 +1,7 @@
 const express = require('express')
 require('dotenv').config()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb')
+const validator = require('validator')
 
 const url = process.env.MONGODB_URI
 
@@ -71,6 +72,10 @@ app.post('/causes', async (req, res) => {
         // Regex validation
         const imageURLRegex = /^(https?:\/\/[^\s]+)$/
         imageURLRegex.test(imageURL) ? null : res.status(400).send('Invalid imageURL')
+
+        // String sanitation
+        title = validator.escape(title)
+        description = validator.escape(description)
   
         // Insert cause into collection
         const result = await collection.insertOne({cause: title, description, imageURL})
@@ -111,6 +116,10 @@ app.put('/causes/:id', async (req, res) => {
         imageURLRegex.test(imageURL) ? null : res.status(400).send('Invalid imageURL')
         const idRegex = /^[0-9a-fA-F]{24}$/
         idRegex.test(id) ? null : res.status(400).send('Invalid id format')
+        
+        // String sanitation
+        title = validator.escape(title)
+        description = validator.escape(description)
 
         // Update cause in collection
         const result = await collection.updateOne({ _id: new ObjectId(id) }, { $set: { title, description, imageURL } })
@@ -150,8 +159,8 @@ app.post('/causes/:id/contribute', async (req, res) => {
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
         emailRegex.test(email) ? null : res.status(400).send('Invalid email address')
 
-        const amountRegex = /^\d+$/
-        amountRegex.test(amount) ? null : res.status(400).send('Invalid amount format')
+        // String sanitation
+        name = validator.escape(name)
 
         const idRegex = /^[0-9a-fA-F]{24}$/
         idRegex.test(id) ? null : res.status(400).send('Invalid id format')
