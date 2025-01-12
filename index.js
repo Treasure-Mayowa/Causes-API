@@ -68,6 +68,10 @@ app.post('/causes', async (req, res) => {
         description ? null : res.status(400).send('Missing description')
         imageURL ? null : res.status(400).send('Missing imageURL')  
 
+        // Regex validation
+        const imageURLRegex = /^(https?:\/\/[^\s]+)$/
+        imageURLRegex.test(imageURL) ? null : res.status(400).send('Invalid imageURL')
+  
         // Insert cause into collection
         const result = await collection.insertOne({cause: title, description, imageURL})
         res.json(result)
@@ -81,6 +85,10 @@ app.post('/causes', async (req, res) => {
 app.get('/causes/:id', async (req, res) => {
     const { id } = req.params
     try {
+        // Regex validation
+        const idRegex = /^[0-9a-fA-F]{24}$/
+        idRegex.test(id) ? null : res.status(400).send('Invalid id format')
+
         const cause = await collection.findOne({ _id: new ObjectId(id) })
         cause ? res.json(cause) : res.status(404).send('Cause not found')
     } catch (err) {
@@ -96,7 +104,13 @@ app.put('/causes/:id', async (req, res) => {
         // Parameters validation
         title ? null : res.status(400).send('Missing title')
         description ? null : res.status(400).send('Missing description')
-        imageURL ? null : res.status(400).send('Missing imageURL')  
+        imageURL ? null : res.status(400).send('Missing imageURL') 
+        
+        // Regex validation
+        const imageURLRegex = /^(https?:\/\/[^\s]+)$/
+        imageURLRegex.test(imageURL) ? null : res.status(400).send('Invalid imageURL')
+        const idRegex = /^[0-9a-fA-F]{24}$/
+        idRegex.test(id) ? null : res.status(400).send('Invalid id format')
 
         // Update cause in collection
         const result = await collection.updateOne({ _id: new ObjectId(id) }, { $set: { title, description, imageURL } })
@@ -110,6 +124,10 @@ app.put('/causes/:id', async (req, res) => {
 app.delete('/causes/:id', async (req, res) => {
     const { id } = req.params
     try {
+        // Regex validation
+        const idRegex = /^[0-9a-fA-F]{24}$/
+        idRegex.test(id) ? null : res.status(400).send('Invalid id format')
+
         const result = await collection.deleteOne({ _id: new ObjectId(id) })
         result.deletedCount ? res.json(result) : res.status(404).send('Cause not found')
     } catch (err) {
@@ -126,7 +144,17 @@ app.post('/causes/:id/contribute', async (req, res) => {
         // Parameters validation
         name ? null : res.status(400).send('Missing name')
         email ? null : res.status(400).send('Missing email')
-        amount ? null : res.status(400).send('Missing amount')  
+        amount ? null : res.status(400).send('Missing amount') 
+        
+        // Regex validation
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+        emailRegex.test(email) ? null : res.status(400).send('Invalid email address')
+
+        const amountRegex = /^\d+$/
+        amountRegex.test(amount) ? null : res.status(400).send('Invalid amount format')
+
+        const idRegex = /^[0-9a-fA-F]{24}$/
+        idRegex.test(id) ? null : res.status(400).send('Invalid id format')
 
         // Retrieve cause by id   
         const cause = await collection.findOne({ _id: new ObjectId(id) })
@@ -134,7 +162,7 @@ app.post('/causes/:id/contribute', async (req, res) => {
 
         const contributionCollection = database.collection("contributions")
         const contributions =  { name, email, amount }
-        const result = await collection.insertOne({ causeId: new ObjectId(id), contributions })
+        const result = await contributionCollection.insertOne({ causeId: new ObjectId(id), causeDonatedTo: cause.title,  contributions })
         res.json(result)
     } catch (err) {
         res.status(500).send(err.message)   
